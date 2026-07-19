@@ -16,6 +16,13 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     OPENAI_API_KEY: str | None = None
     GEMINI_API_KEY: str | None = None
+    
+    # Feature Flags
+    FEATURE_GROCERY: bool = True
+    FEATURE_RESTAURANT: bool = False
+    FEATURE_GRAPH: bool = False
+    FEATURE_AI: bool = True
+    FEATURE_EXPLAINABILITY: bool = True
 
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:

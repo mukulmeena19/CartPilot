@@ -8,7 +8,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.logger import setup_logging, get_logger
-from app.api.routers import auth, users, categories, products, carts, orders, ai, shopping
+from app.api.v1.routers import auth, users, categories, products, carts, orders, ai, shopping
 from fastapi.middleware.cors import CORSMiddleware
 
 # Initialize structured logging
