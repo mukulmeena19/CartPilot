@@ -10,6 +10,8 @@ class ProductCandidate(BaseModel):
     retrieval_method: str = "hybrid"
     matched_attributes: List[str] = Field(default_factory=list)
     embedding_model: str
+    brand: Optional[str] = None
+    reasoning: Optional[str] = None
 
 class CategoryRetrievalResult(BaseModel):
     category_name: str

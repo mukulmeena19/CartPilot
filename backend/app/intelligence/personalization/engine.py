@@ -1,66 +1,107 @@
 """
 Personalization Engine.
-Generates deterministic affinity scores and retrieval filters for a user.
+Adjusts scores, generates search filters, and manages user taste profiles.
 """
 from __future__ import annotations
 
-import logging
-from typing import Dict, Any, List
+import structlog
+from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
+from datetime import datetime, timezone
 
+from app.db.repositories.intelligence import IntelligenceRepository
 from app.db.models.intelligence import TasteProfile, UserPreference
+from app.ai.retrieval.models import ProductCandidate
 
-logger = logging.getLogger(__name__)
-
+logger = structlog.get_logger(__name__)
 
 class PersonalizationEngine:
     def __init__(self, db: Session):
+        self.repo = IntelligenceRepository(db)
         self.db = db
 
-    def get_user_taste_profile(self, user_id: int) -> TasteProfile | None:
-        """Fetch the pre-computed TasteProfile."""
-        return self.db.query(TasteProfile).filter(TasteProfile.user_id == user_id).first()
-
-    def get_active_preferences(self, user_id: int) -> List[UserPreference]:
-        """Fetch explicit and strongly implicit preferences."""
-        return (
-            self.db.query(UserPreference)
-            .filter(UserPreference.user_id == user_id)
-            .filter(UserPreference.affinity > 0.0)
-            .all()
-        )
-
-    def generate_retrieval_filters(self, user_id: int) -> Dict[str, Any]:
-        """
-        Generate hard filters for semantic search (e.g. MUST NOT contain allergens, MUST be Vegan).
-        These bypass LLM reasoning and guarantee safety/compliance with explicit user settings.
-        """
-        prefs = self.get_active_preferences(user_id)
-        
-        filters = {
-            "must_not": [],
-            "must": []
-        }
-        
-        for pref in prefs:
-            if pref.category == "allergy" and pref.affinity < 0.1:
-                filters["must_not"].append(pref.key)
-            elif pref.category == "dietary" and pref.affinity > 0.9:
-                filters["must"].append(pref.key)
-                
-        return filters
-
-    def get_affinity_boosts(self, user_id: int) -> Dict[str, Dict[str, float]]:
-        """
-        Returns dictionaries of affinities to be injected into the Plugin Ranking Engine.
-        Returns:
-            {"cuisine": {"Indian": 0.8, "Italian": 0.4}, "brand": {"Amul": 0.9}}
-        """
-        profile = self.get_user_taste_profile(user_id)
-        if not profile:
-            return {"cuisine": {}, "brand": {}}
+    def cold_start_profile(self, user_id: int, initial_preferences: Dict[str, Any]) -> TasteProfile:
+        """Initialize a new TasteProfile for a user based on onboarding data."""
+        try:
+            profile = TasteProfile(
+                user_id=user_id,
+                cuisine_affinities=initial_preferences.get("cuisines", {}),
+                brand_affinities=initial_preferences.get("brands", {})
+            )
+            self.repo.save_taste_profile(profile)
             
-        return {
-            "cuisine": profile.cuisine_affinities or {},
-            "brand": profile.brand_affinities or {}
-        }
+            # Also create explicit UserPreferences
+            for cuisine, score in initial_preferences.get("cuisines", {}).items():
+                self.update_preferences(user_id, "cuisine", cuisine, score, "explicit")
+                
+            for brand, score in initial_preferences.get("brands", {}).items():
+                self.update_preferences(user_id, "brand", brand, score, "explicit")
+
+            logger.info("Cold start profile created", user_id=user_id)
+            return profile
+        except Exception as e:
+            logger.error("Failed to create cold start profile", error=str(e), user_id=user_id)
+            # Raise so tests can catch it
+            raise
+
+    def update_preferences(self, user_id: int, category: str, key: str, affinity: float, source: str = "explicit") -> UserPreference:
+        """
+        Incrementally updates a specific user preference score.
+        """
+        try:
+            pref = self.repo.get_preference(user_id, category, key)
+            if pref:
+                pref.affinity = min(1.0, max(-1.0, pref.affinity + affinity))
+                self.repo.save_preference(pref)
+            else:
+                new_pref = UserPreference(
+                    user_id=user_id,
+                    category=category,
+                    key=key,
+                    affinity=affinity,
+                    source=source
+                )
+                self.repo.save_preference(new_pref)
+                pref = new_pref
+            return pref
+        except Exception as e:
+            logger.error("Failed to update preference", error=str(e), user_id=user_id, category=category, key=key)
+            raise
+
+    def calculate_affinity(self, user_id: int, candidates: List[ProductCandidate]) -> List[ProductCandidate]:
+        """
+        Adjusts product candidate scores based on explicit user preferences.
+        """
+        try:
+            prefs = self.repo.get_all_preferences(user_id)
+            if not prefs:
+                return candidates
+
+            brand_prefs = {p.key: p.affinity for p in prefs if p.category == 'brand'}
+            
+            for candidate in candidates:
+                if candidate.brand and candidate.brand in brand_prefs:
+                    affinity = brand_prefs[candidate.brand]
+                    if affinity > 0:
+                        bump = affinity * 0.05
+                        candidate.similarity_score = min(1.0, candidate.similarity_score + bump)
+                        candidate.reasoning = candidate.reasoning or ""
+                        candidate.reasoning += f" [Matches favorite brand: {candidate.brand}]"
+
+            candidates.sort(key=lambda x: x.similarity_score, reverse=True)
+            return candidates
+        except Exception as e:
+            logger.error("Failed to calculate affinity", error=str(e), user_id=user_id)
+            return candidates
+
+    def generate_filters(self, user_id: int) -> Dict[str, Any]:
+        filters = {}
+        try:
+            prefs = self.repo.get_all_preferences(user_id)
+            allergies = [p.key for p in prefs if p.category == 'allergy' and p.affinity < 0]
+            if allergies:
+                filters["exclude_ingredients"] = allergies
+        except Exception as e:
+            logger.error("Failed to generate filters", error=str(e), user_id=user_id)
+        
+        return filters

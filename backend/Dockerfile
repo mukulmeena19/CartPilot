@@ -33,5 +33,5 @@ USER cartpilot
 # Expose port
 EXPOSE 8000
 
-# Start the application using uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start the application using uvicorn with 4 workers for production concurrency
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]

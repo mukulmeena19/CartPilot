@@ -24,4 +24,7 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     chat_sessions = relationship("ChatSession", back_populates="user", cascade="all, delete-orphan")
-
+    taste_profile = relationship("TasteProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    preferences = relationship("UserPreference", back_populates="user", cascade="all, delete-orphan")
+    behavioral_history = relationship("BehavioralHistory", back_populates="user", cascade="all, delete-orphan")
+    recommendation_feedback = relationship("RecommendationFeedback", back_populates="user", cascade="all, delete-orphan")

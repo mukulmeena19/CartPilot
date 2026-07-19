@@ -6,6 +6,7 @@ from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Tex
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
+from app.core.config import settings
 from app.db.base import Base
 
 
@@ -20,13 +21,15 @@ class TasteProfile(Base):
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False, index=True)
     
     # The semantic embedding representing their combined tastes
-    embedding = Column(Vector(1536), nullable=True)
+    embedding = Column(Vector(settings.EMBEDDING_DIMENSION), nullable=True)
     
     # Pre-computed affinity maps for fast ranking (e.g. {"Indian": 0.9, "Chinese": 0.4})
     cuisine_affinities = Column(JSON, default=dict)
     brand_affinities = Column(JSON, default=dict)
     
     last_updated = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    
+    user = relationship("User", back_populates="taste_profile")
 
 
 class UserPreference(Base):
@@ -49,6 +52,8 @@ class UserPreference(Base):
     source = Column(String, default="implicit")
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    user = relationship("User", back_populates="preferences")
 
 
 class BehavioralHistory(Base):
@@ -67,6 +72,8 @@ class BehavioralHistory(Base):
     context = Column(JSON, nullable=True)                    # e.g. search query that led to this
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    user = relationship("User", back_populates="behavioral_history")
 
 
 class RecommendationFeedback(Base):
@@ -86,3 +93,5 @@ class RecommendationFeedback(Base):
     feedback_score = Column(Integer, nullable=False)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="recommendation_feedback")

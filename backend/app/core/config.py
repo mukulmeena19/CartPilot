@@ -14,8 +14,15 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "a-very-secure-secret-key-for-cartpilot-mvp"  # Should be overridden in .env
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
+    
+    REDIS_URL: str = "redis://localhost:6379/0"
+    
     OPENAI_API_KEY: str | None = None
     GEMINI_API_KEY: str | None = None
+    
+    # Embeddings
+    EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"  # or 'models/text-embedding-004' for production
+    EMBEDDING_DIMENSION: int = 384  # 384 for MiniLM, 768 for Gemini
     
     # Feature Flags
     FEATURE_GROCERY: bool = True

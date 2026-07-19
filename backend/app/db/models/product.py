@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
 from app.db.base import Base
+from app.core.config import settings
 
 class Product(Base):
     __tablename__ = "products"
@@ -18,7 +19,7 @@ class Product(Base):
     is_active = Column(Boolean, default=True)
     
     # Embedding for semantic search (e.g. text-embedding-3-small -> 1536 dims)
-    embedding = Column(Vector(1536), nullable=True)
+    embedding = Column(Vector(settings.EMBEDDING_DIMENSION), nullable=True)
     
     # Embedding Metadata for Versioning and Explainability
     embedding_model = Column(String, nullable=True)

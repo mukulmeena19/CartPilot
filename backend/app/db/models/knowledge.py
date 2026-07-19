@@ -6,6 +6,7 @@ from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Foreig
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
+from app.core.config import settings
 from app.db.base import Base
 
 
@@ -25,7 +26,7 @@ class Recipe(Base):
     calories = Column(Float, nullable=True)
     
     # Semantic search
-    embedding = Column(Vector(1536), nullable=True)
+    embedding = Column(Vector(settings.EMBEDDING_DIMENSION), nullable=True)
     image_url = Column(String, nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -42,7 +43,7 @@ class Ingredient(Base):
     normalized_name = Column(String, nullable=False, index=True)  # e.g. "tomatoes, diced" -> "tomato"
     
     # Semantic search
-    embedding = Column(Vector(1536), nullable=True)
+    embedding = Column(Vector(settings.EMBEDDING_DIMENSION), nullable=True)
 
     # Relationships
     recipes = relationship("RecipeIngredient", back_populates="ingredient")

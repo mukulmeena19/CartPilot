@@ -6,6 +6,7 @@ from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, JSON, 
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
+from app.core.config import settings
 from app.db.base import Base
 
 
@@ -38,7 +39,7 @@ class Restaurant(Base):
     dietary_tags = Column(JSON, default=list)   # ["Vegetarian", "Vegan"]
 
     # Semantic search
-    embedding = Column(Vector(1536), nullable=True)
+    embedding = Column(Vector(settings.EMBEDDING_DIMENSION), nullable=True)
 
     image_url = Column(String, nullable=True)
 
@@ -80,7 +81,7 @@ class MenuItem(Base):
     discount_percent = Column(Float, default=0.0)
 
     # Semantic search
-    embedding = Column(Vector(1536), nullable=True)
+    embedding = Column(Vector(settings.EMBEDDING_DIMENSION), nullable=True)
 
     image_url = Column(String, nullable=True)
 

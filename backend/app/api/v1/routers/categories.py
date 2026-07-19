@@ -1,6 +1,7 @@
 from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from fastapi_cache.decorator import cache
 from app.api import deps
 from app.schemas.category import Category, CategoryCreate, CategoryUpdate
 from app.services import commerce_service
@@ -8,6 +9,7 @@ from app.services import commerce_service
 router = APIRouter()
 
 @router.get("/", response_model=List[Category])
+@cache(expire=3600)
 def read_categories(
     db: Session = Depends(deps.get_db),
     skip: int = 0,

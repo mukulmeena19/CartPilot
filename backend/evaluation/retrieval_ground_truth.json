@@ -1,0 +1,26 @@
+[
+    {
+        "query": "high protein snacks",
+        "expected": [
+            "Greek Yogurt",
+            "Roasted Chickpeas",
+            "Protein Bar"
+        ]
+    },
+    {
+        "query": "low calorie breakfast",
+        "expected": [
+            "Oats",
+            "Yogurt",
+            "Berries"
+        ]
+    },
+    {
+        "query": "vegetarian dinner",
+        "expected": [
+            "Paneer",
+            "Lentils",
+            "Tofu"
+        ]
+    }
+]

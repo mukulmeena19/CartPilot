@@ -8,21 +8,27 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.logger import setup_logging, get_logger
-from app.api.v1.routers import auth, users, categories, products, carts, orders, ai, shopping
+from app.api.v1.routers import auth, users, categories, products, carts, orders, ai, shopping, conversation
 from fastapi.middleware.cors import CORSMiddleware
 
 # Initialize structured logging
 setup_logging()
 logger = get_logger(__name__)
 
-# Rate Limiter
-limiter = Limiter(key_func=get_remote_address)
+# Redis Storage for Rate Limiting
+from limits.storage import RedisStorage
+rate_limit_storage = RedisStorage(settings.REDIS_URL)
+limiter = Limiter(key_func=get_remote_address, storage_uri=settings.REDIS_URL)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
+
+# Prometheus Metrics
+from prometheus_fastapi_instrumentator import Instrumentator
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,6 +41,21 @@ app.add_middleware(
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# FastAPI Cache
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from redis import asyncio as aioredis
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    redis = aioredis.from_url(settings.REDIS_URL)
+    FastAPICache.init(RedisBackend(redis), prefix="cartpilot-cache")
+    yield
+    # Cleanup logic if any
+
+app.router.lifespan_context = lifespan
 
 # Ensure DB tables are created
 from app.db.base import Base
@@ -128,6 +149,7 @@ app.include_router(carts.router, prefix=f"{settings.API_V1_STR}/carts", tags=["c
 app.include_router(orders.router, prefix=f"{settings.API_V1_STR}/orders", tags=["orders"])
 app.include_router(ai.router, prefix=f"{settings.API_V1_STR}/ai", tags=["ai"])
 app.include_router(shopping.router, prefix=f"{settings.API_V1_STR}/shopping", tags=["shopping"])
+app.include_router(conversation.router, prefix=f"{settings.API_V1_STR}/conversation", tags=["conversation"])
 
 import os
 from sqlalchemy import text

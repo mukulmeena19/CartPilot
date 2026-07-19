@@ -31,3 +31,44 @@ def create_access_token(
 def create_refresh_token() -> str:
     # 32 bytes of secure random hex string
     return secrets.token_hex(32)
+
+import re
+import logging
+from typing import Tuple
+
+logger = logging.getLogger(__name__)
+
+class PromptSecurity:
+    """
+    Lightweight heuristic-based prompt injection safeguard.
+    """
+    
+    # Common jailbreak patterns
+    JAILBREAK_PATTERNS = [
+        r"(?i)ignore previous instructions",
+        r"(?i)disregard previous instructions",
+        r"(?i)you are now",
+        r"(?i)system prompt",
+        r"(?i)print your instructions",
+        r"(?i)developer mode",
+        r"(?i)act as a",
+        r"(?i)DAN",  # Do Anything Now
+    ]
+    
+    _compiled_patterns = [re.compile(p) for p in JAILBREAK_PATTERNS]
+
+    @classmethod
+    def scan_input(cls, user_input: str) -> Tuple[bool, str]:
+        """
+        Scans user input for potential prompt injection patterns.
+        Returns a tuple: (is_safe: bool, reason: str)
+        """
+        if not user_input:
+            return True, ""
+            
+        for pattern in cls._compiled_patterns:
+            if pattern.search(user_input):
+                logger.warning(f"Blocked potential prompt injection. Matched pattern: {pattern.pattern}")
+                return False, "Input flagged by security filters."
+                
+        return True, ""

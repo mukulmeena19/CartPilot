@@ -1,6 +1,7 @@
 from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from fastapi_cache.decorator import cache
 from app.api import deps
 from app.schemas.product import Product, ProductCreate, ProductUpdate
 from app.services import commerce_service
@@ -8,6 +9,7 @@ from app.services import commerce_service
 router = APIRouter()
 
 @router.get("/", response_model=List[Product])
+@cache(expire=300)
 def read_products(
     db: Session = Depends(deps.get_db),
     skip: int = Query(0, ge=0),
@@ -30,6 +32,7 @@ def create_product(
     return commerce_service.create_product(db, product_in=product_in)
 
 @router.get("/{product_id}", response_model=Product)
+@cache(expire=3600)
 def read_product(
     product_id: int,
     db: Session = Depends(deps.get_db)
