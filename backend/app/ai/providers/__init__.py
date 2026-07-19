@@ -8,7 +8,7 @@ def get_llm_provider() -> LLMProvider:
         from .mock import MockProvider
         return MockProvider()
     elif provider_name == "gemini":
-        from .gemini import GeminiProvider # Hypothetical future provider
+        from .gemini_provider import GeminiProvider
         return GeminiProvider()
     else:
         # Default to Gemini if key is present, else OpenAI, else Mock
