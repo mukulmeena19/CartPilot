@@ -41,9 +41,13 @@ from app.db.base import Base
 from app.db.session import engine
 from sqlalchemy import text
 
-# Enable pgvector extension before creating tables
+# Enable pgvector extension and handle missing schema columns before creating tables
 with engine.connect() as conn:
     conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+    try:
+        conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE"))
+    except Exception as e:
+        logger.warning(f"Failed to alter products table: {e}")
     conn.commit()
 
 # Import all models so SQLAlchemy knows about them before create_all
