@@ -17,7 +17,7 @@ class GeminiProvider(LLMProvider):
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable is not set")
         self.client = genai.Client(api_key=api_key)
-        self.model_name = "gemini-1.5-flash"
+        self.model_name = "gemini-3.5-flash"
 
     def generate_structured(
         self, 
