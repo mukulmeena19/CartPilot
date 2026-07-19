@@ -52,7 +52,8 @@ export function useChatStream() {
     });
 
     try {
-      await fetchEventSource("http://127.0.0.1:8000/api/v1/conversation/stream", {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      await fetchEventSource(`${baseUrl}/api/v1/conversation/stream`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Hardcoded backend URL to bypass Railway environment variable configuration issues
-const API_URL = 'https://cartpilot-backend-production.up.railway.app/api/v1';
+// Fallback for local development, but respects Vercel environment variable
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1`;
 
 export const api = axios.create({
   baseURL: API_URL,
