@@ -61,18 +61,23 @@ from app.db.session import engine
 from sqlalchemy import text
 
 # Enable pgvector extension and handle missing schema columns before creating tables
-with engine.connect() as conn:
-    conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-    try:
-        conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE"))
-    except Exception as e:
-        logger.warning(f"Failed to alter products table: {e}")
-    conn.commit()
+try:
+    with engine.connect() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        try:
+            conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE"))
+        except Exception as e:
+            logger.warning(f"Failed to alter products table: {e}")
+        conn.commit()
 
-# Import all models so SQLAlchemy knows about them before create_all
-from app.db.models import user, product, category, cart, order, inventory, token
+    # Import all models so SQLAlchemy knows about them before create_all
+    from app.db.models import user, product, category, cart, order, inventory, token
 
-Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables verified successfully.")
+except Exception as e:
+    logger.error(f"Failed to connect to the database during startup: {e}")
+    logger.error("The API will continue to run, but database-dependent endpoints will fail.")
 
 @app.get("/", tags=["Health"])
 def root():
