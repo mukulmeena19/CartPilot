@@ -4,7 +4,7 @@ from typing import Dict, Any, Type, TypeVar
 from pydantic import BaseModel
 
 from app.ai.providers.base import LLMProvider
-from app.ai.understanding.models import GoalContext
+from app.ai.goal_understanding.models import GoalContext
 from app.ai.planning.models import ShoppingPlan, CategoryAllocation
 
 T = TypeVar('T', bound=BaseModel)
