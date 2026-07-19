@@ -1,6 +1,6 @@
 import json
 import uuid
-from typing import Dict, Any, Type, TypeVar
+from typing import Dict, Any, Type, TypeVar, Tuple
 from pydantic import BaseModel
 
 from app.ai.providers.base import LLMProvider
@@ -15,10 +15,17 @@ class MockProvider(LLMProvider):
     It completely bypasses network calls to guarantee fast, reliable tests.
     """
     
-    def generate_structured_response(self, prompt: str, schema: Type[T]) -> T:
+    def generate_structured(
+        self, 
+        system_prompt: str, 
+        user_prompt: str, 
+        response_model: Type[T]
+    ) -> Tuple[T, Dict[str, Any]]:
         """
         Interrogates the schema requested and returns a deterministic mock payload.
         """
+        
+        schema = response_model
         
         if schema == GoalContext:
             # Deterministic response for Goal Understanding
@@ -34,7 +41,7 @@ class MockProvider(LLMProvider):
                 "missing_information": [],
                 "assumptions": ["Assuming Indian currency (₹) based on common threshold 2500."]
             }
-            return schema.model_validate(mock_data)
+            return schema.model_validate(mock_data), {"model": "mock", "tokens": 0}
             
         elif schema == ShoppingPlan:
             # Deterministic response for Shopping Plan
@@ -60,7 +67,7 @@ class MockProvider(LLMProvider):
                 "planning_confidence": 0.95,
                 "assumptions": ["Budget splits safely without hitting the exact 2500 ceiling."]
             }
-            return schema.model_validate(mock_data)
+            return schema.model_validate(mock_data), {"model": "mock", "tokens": 0}
             
         else:
             raise ValueError(f"MockProvider does not have a predefined response for schema {schema.__name__}")
