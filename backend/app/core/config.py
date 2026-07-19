@@ -14,8 +14,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "a-very-secure-secret-key-for-cartpilot-mvp"  # Should be overridden in .env
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
-    
     OPENAI_API_KEY: str | None = None
+    GEMINI_API_KEY: str | None = None
 
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
