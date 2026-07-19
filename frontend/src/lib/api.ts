@@ -1,11 +1,7 @@
 import axios from 'axios';
 
-let rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-rawUrl = rawUrl.replace(/\/$/, ''); // Remove trailing slash if user added one
-if (!rawUrl.startsWith('http')) {
-  rawUrl = `https://${rawUrl}`;
-}
-const API_URL = rawUrl.endsWith('/api/v1') ? rawUrl : `${rawUrl}/api/v1`;
+// Hardcoded backend URL to bypass Railway environment variable configuration issues
+const API_URL = 'https://cartpilot-backend-production.up.railway.app/api/v1';
 
 export const api = axios.create({
   baseURL: API_URL,
