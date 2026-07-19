@@ -7,6 +7,8 @@ from app.db.base import Base
 # Import all models so Base metadata is populated
 from app.db.models.user import User
 from app.db.models.product import Product
+from app.db.models.category import Category
+from app.db.models.inventory import Inventory
 from app.db.models.restaurant import Restaurant, MenuItem
 from app.db.models.knowledge import Recipe, Ingredient
 from app.db.models.intelligence import TasteProfile
