@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
@@ -15,6 +15,7 @@ class Product(Base):
     price = Column(Float, nullable=False)
     unit = Column(String, nullable=False) # e.g., 'kg', 'g', 'liter', 'piece'
     image_url = Column(String, nullable=True)
+    is_active = Column(Boolean, default=True)
     
     # Embedding for semantic search (e.g. text-embedding-3-small -> 1536 dims)
     embedding = Column(Vector(1536), nullable=True)
