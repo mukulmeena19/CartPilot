@@ -15,10 +15,10 @@ from fastapi.middleware.cors import CORSMiddleware
 setup_logging()
 logger = get_logger(__name__)
 
-# Redis Storage for Rate Limiting
-from limits.storage import RedisStorage
-rate_limit_storage = RedisStorage(settings.REDIS_URL)
-limiter = Limiter(key_func=get_remote_address, storage_uri=settings.REDIS_URL)
+# Memory Storage for Rate Limiting
+from limits.storage import MemoryStorage
+rate_limit_storage = MemoryStorage()
+limiter = Limiter(key_func=get_remote_address, storage_uri="memory://")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -44,14 +44,12 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # FastAPI Cache
 from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
-from redis import asyncio as aioredis
+from fastapi_cache.backends.inmemory import InMemoryBackend
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    redis = aioredis.from_url(settings.REDIS_URL)
-    FastAPICache.init(RedisBackend(redis), prefix="cartpilot-cache")
+    FastAPICache.init(InMemoryBackend(), prefix="cartpilot-cache")
     yield
     # Cleanup logic if any
 
