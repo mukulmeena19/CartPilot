@@ -11,6 +11,11 @@ def get_llm_provider() -> LLMProvider:
         from .gemini import GeminiProvider # Hypothetical future provider
         return GeminiProvider()
     else:
-        # Default to OpenAI
-        from .openai_provider import OpenAIProvider
-        return OpenAIProvider()
+        # Default to OpenAI if key is present, else fallback to Mock
+        from app.core.config import settings
+        if not settings.OPENAI_API_KEY:
+            from .mock import MockProvider
+            return MockProvider()
+        else:
+            from .openai_provider import OpenAIProvider
+            return OpenAIProvider()
