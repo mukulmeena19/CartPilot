@@ -31,8 +31,12 @@ class Settings(BaseSettings):
     FEATURE_AI: bool = True
     FEATURE_EXPLAINABILITY: bool = True
 
+    DATABASE_URL: str | None = None
+
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
+        if self.DATABASE_URL:
+            return self.DATABASE_URL
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)

@@ -76,7 +76,7 @@ export function ProductCard({ product }: { product: ProductData }) {
       <div className="bg-muted/50 rounded-xl p-3 text-sm">
         <p className="font-medium text-foreground mb-2 text-xs uppercase tracking-wider">Recommended because</p>
         <ul className="space-y-1.5">
-          {product.reasons.map((reason, idx) => (
+          {product.reasons?.map((reason, idx) => (
             <li key={idx} className="flex items-start gap-2 text-secondary">
               <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
               <span className="leading-tight">{reason}</span>

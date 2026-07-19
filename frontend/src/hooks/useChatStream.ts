@@ -118,7 +118,7 @@ export function useChatStream() {
           console.error("SSE Error:", err);
           setIsStreaming(false);
           // Only throw if we want it to auto-reconnect (we don't)
-          throw err;
+          throw new Error("Fatal SSE stream error");
         }
       });
     } catch (err) {
