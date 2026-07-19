@@ -4,15 +4,13 @@ from typing import Dict, Any, Type, TypeVar, Tuple
 from pydantic import BaseModel
 
 from app.ai.providers.base import LLMProvider
-from app.ai.goal_understanding.models import GoalContext
-from app.ai.planning.models import ShoppingPlan, CategoryAllocation
 
 T = TypeVar('T', bound=BaseModel)
 
 class MockProvider(LLMProvider):
     """
-    A deterministic Mock LLM Provider for End-to-End automated testing.
-    It completely bypasses network calls to guarantee fast, reliable tests.
+    A deterministic Mock LLM Provider for testing without API keys.
+    Returns realistic mock shopping cart data for any query.
     """
     
     def generate_structured(
@@ -21,53 +19,77 @@ class MockProvider(LLMProvider):
         user_prompt: str, 
         response_model: Type[T]
     ) -> Tuple[T, Dict[str, Any]]:
-        """
-        Interrogates the schema requested and returns a deterministic mock payload.
-        """
         
-        schema = response_model
+        schema_name = response_model.__name__
         
-        if schema == GoalContext:
-            # Deterministic response for Goal Understanding
+        if schema_name == "GoalContext":
             mock_data = {
-                "goal_type": "meal_prep",
+                "goal_type": "weekly_groceries",
+                "shopping_goal": "Weekly grocery shopping",
                 "people": 2,
-                "budget": 2500,
+                "budget": 2500.0,
                 "duration": "7 days",
-                "dietary_preferences": ["vegetarian", "high_protein"],
-                "meal_types": ["breakfast", "dinner"],
-                "excluded_ingredients": [],
-                "confidence_score": 0.95,
-                "missing_information": [],
-                "assumptions": ["Assuming Indian currency (₹) based on common threshold 2500."]
+                "dietary_preferences": ["vegetarian"],
+                "brand_preferences": [],
+                "constraints": [],
+                "confidence": 0.92
             }
-            return schema.model_validate(mock_data), {"model": "mock", "tokens": 0}
-            
-        elif schema == ShoppingPlan:
-            # Deterministic response for Shopping Plan
+        elif schema_name == "AIPlanningInference":
             mock_data = {
                 "categories": [
                     {
-                        "name": "Dairy",
-                        "priority": 1,
-                        "estimated_budget": 1000.0,
+                        "name": "Dairy & Protein",
+                        "weight": 8.0,
                         "target_quantity": "high",
-                        "reasoning": "High protein requirement necessitates dairy (milk, paneer)."
+                        "reasoning": "Essential for vegetarian protein intake."
                     },
                     {
-                        "name": "Vegetables",
-                        "priority": 2,
-                        "estimated_budget": 1500.0,
+                        "name": "Fresh Vegetables",
+                        "weight": 7.0,
+                        "target_quantity": "high",
+                        "reasoning": "Core of a vegetarian diet."
+                    },
+                    {
+                        "name": "Grains & Staples",
+                        "weight": 6.0,
                         "target_quantity": "medium",
-                        "reasoning": "Vegetarian diet requires fresh produce."
+                        "reasoning": "Provides carbohydrates and energy."
+                    }
+                ],
+                "confidence": 0.90
+            }
+        elif schema_name == "ShoppingPlan":
+            mock_data = {
+                "categories": [
+                    {
+                        "name": "Dairy & Protein",
+                        "priority": 1,
+                        "estimated_budget": 800.0,
+                        "target_quantity": "high",
+                        "reasoning": "Milk, paneer, curd for protein."
+                    },
+                    {
+                        "name": "Fresh Vegetables",
+                        "priority": 2,
+                        "estimated_budget": 1000.0,
+                        "target_quantity": "high",
+                        "reasoning": "Tomatoes, onions, greens."
+                    },
+                    {
+                        "name": "Grains & Staples",
+                        "priority": 3,
+                        "estimated_budget": 700.0,
+                        "target_quantity": "medium",
+                        "reasoning": "Rice, dal, atta."
                     }
                 ],
                 "total_budget": 2500.0,
-                "goal_confidence": 0.9,
-                "planning_confidence": 0.95,
-                "assumptions": ["Budget splits safely without hitting the exact 2500 ceiling."]
+                "goal_confidence": 0.92,
+                "planning_confidence": 0.90,
+                "assumptions": ["Budget in INR based on common usage."]
             }
-            return schema.model_validate(mock_data), {"model": "mock", "tokens": 0}
-            
         else:
-            raise ValueError(f"MockProvider does not have a predefined response for schema {schema.__name__}")
+            # Generic fallback - try to build a minimal valid response
+            raise ValueError(f"MockProvider has no predefined response for schema: {schema_name}")
+        
+        return response_model.model_validate(mock_data), {"model": "mock", "tokens": 0, "latency": 0.01}
