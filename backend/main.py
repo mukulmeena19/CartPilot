@@ -38,6 +38,12 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # Ensure DB tables are created
 from app.db.base import Base
 from app.db.session import engine
+from sqlalchemy import text
+
+# Enable pgvector extension before creating tables
+with engine.connect() as conn:
+    conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+    conn.commit()
 
 # Import all models so SQLAlchemy knows about them before create_all
 from app.db.models import user, product, category, cart, order, inventory, token
