@@ -2,7 +2,7 @@ import time
 import structlog
 from typing import Tuple, Dict, Any
 from sqlalchemy.orm import Session
-from app.ai.providers.embeddings import OpenAIEmbeddingProvider
+from app.ai.providers.embeddings import get_embedding_provider
 from app.ai.planning.models import ShoppingPlan
 from app.ai.retrieval.models import RetrievalResult, CategoryRetrievalResult
 from app.ai.retrieval.retriever import HybridRetriever
@@ -12,7 +12,7 @@ logger = structlog.get_logger(__name__)
 class RetrievalService:
     def __init__(self, db: Session):
         self.db = db
-        self.embedding_provider = OpenAIEmbeddingProvider()
+        self.embedding_provider = get_embedding_provider()
         self.retriever = HybridRetriever(db=self.db, embedding_provider=self.embedding_provider)
 
     def retrieve_products(self, plan: ShoppingPlan) -> Tuple[RetrievalResult, Dict[str, Any]]:
