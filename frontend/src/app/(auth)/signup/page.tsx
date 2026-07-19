@@ -22,7 +22,11 @@ export default function SignupPage() {
       });
       router.push("/login");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Signup failed");
+      if (err.response?.status === 422) {
+        setError("Invalid input data. Please check your email format.");
+      } else {
+        setError(err.response?.data?.detail || "Signup failed");
+      }
     }
   };
 

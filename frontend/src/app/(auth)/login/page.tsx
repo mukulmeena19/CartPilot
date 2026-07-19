@@ -27,7 +27,11 @@ export default function LoginPage() {
       login(data.access_token);
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Login failed");
+      if (err.response?.status === 422) {
+        setError("Invalid credentials format.");
+      } else {
+        setError(err.response?.data?.detail || "Login failed");
+      }
     }
   };
 
