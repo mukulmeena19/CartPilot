@@ -14,6 +14,11 @@ from app.db.models.product import Product
 from app.db.models.inventory import Inventory
 from app.db.models.cart import Cart, CartItem
 from app.db.models.order import Order
+from app.db.models.restaurant import Restaurant, MenuItem
+from app.db.models.chat import ChatSession, ChatMessage
+from app.db.models.knowledge import Recipe, Ingredient, RecipeIngredient, Substitution
+from app.db.models.intelligence import TasteProfile, UserPreference, BehavioralHistory, RecommendationFeedback
+from app.db.models.analytics import AnalyticsEvent, TrendSnapshot, MarketBasketAssociation
 
 config = context.config
 
