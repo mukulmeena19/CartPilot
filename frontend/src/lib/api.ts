@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+let rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+rawUrl = rawUrl.replace(/\/$/, ''); // Remove trailing slash if user added one
+const API_URL = rawUrl.endsWith('/api/v1') ? rawUrl : `${rawUrl}/api/v1`;
 
 export const api = axios.create({
   baseURL: API_URL,
