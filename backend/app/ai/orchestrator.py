@@ -4,8 +4,8 @@ from typing import AsyncGenerator
 from sqlalchemy.orm import Session
 
 from app.db.models.user import User
-from app.ai.understanding.service import GoalUnderstandingService
-from app.ai.understanding.schemas import GoalUnderstandingRequest
+from app.ai.goal_understanding.service import GoalUnderstandingService
+from app.ai.goal_understanding.schemas import GoalUnderstandingRequest
 from app.ai.planning.service import PlanningService
 from app.ai.planning.schemas import PlanningRequest
 from app.ai.retrieval.service import RetrievalService
