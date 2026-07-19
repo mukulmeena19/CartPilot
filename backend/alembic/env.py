@@ -6,6 +6,15 @@ from alembic import context
 from app.core.config import settings
 from app.db.base import Base
 
+# Import models for Alembic autogenerate
+from app.db.models.user import User
+from app.db.models.token import RefreshToken
+from app.db.models.category import Category
+from app.db.models.product import Product
+from app.db.models.inventory import Inventory
+from app.db.models.cart import Cart, CartItem
+from app.db.models.order import Order
+
 config = context.config
 
 if config.config_file_name is not None:
