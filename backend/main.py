@@ -26,7 +26,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,6 +34,15 @@ app.add_middleware(
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Ensure DB tables are created
+from app.db.base import Base
+from app.db.session import engine
+Base.metadata.create_all(bind=engine)
+
+@app.get("/", tags=["Health"])
+def root():
+    return {"status": "CartPilot API is running", "message": "Visit /docs for the API dashboard."}
 
 # --- MIDDLEWARE ---
 
