@@ -38,6 +38,10 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # Ensure DB tables are created
 from app.db.base import Base
 from app.db.session import engine
+
+# Import all models so SQLAlchemy knows about them before create_all
+from app.db.models import user, product, category, cart, order, inventory, token
+
 Base.metadata.create_all(bind=engine)
 
 @app.get("/", tags=["Health"])
