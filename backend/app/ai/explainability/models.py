@@ -22,3 +22,4 @@ class ExplainableShoppingPlan(BaseModel):
     total_budget_used: float
     total_budget_allocated: float
     optimization_success_rate: float
+    summary: Optional[str] = None

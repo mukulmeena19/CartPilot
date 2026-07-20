@@ -21,6 +21,7 @@ class WorkflowRegistry:
         self.db = db
         self.registry: Dict[str, Type[BaseWorkflow]] = {
             "grocery": GroceryWorkflow,
+            "food": FoodOrderingWorkflow,
             "food_ordering": FoodOrderingWorkflow
         }
 
@@ -35,6 +36,5 @@ class WorkflowRegistry:
             context.errors.append(f"No workflow for {domain}")
             return context
             
-        workflow = workflow_cls()
-        # In a real app, you might pass dependencies via DI here instead of tightly coupling
+        workflow = workflow_cls(self.db)
         return await workflow.execute(context)

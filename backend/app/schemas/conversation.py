@@ -34,15 +34,16 @@ class StreamEvent(BaseModel):
     timestamp: str
     event: Literal[
         "connected", 
-        "thinking", 
+        "understanding",
         "intent", 
         "workflow", 
-        "retrieval", 
-        "ranking", 
-        "recommendations", 
-        "cart_update", 
-        "assistant_chunk", 
-        "done", 
+        "planning",
+        "searching",
+        "verifying",
+        "applying",
+        "optimizing",
+        "finalizing",
+        "complete",
         "error"
     ]
     data: Dict[str, Any]

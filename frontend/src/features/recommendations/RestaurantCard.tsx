@@ -1,4 +1,4 @@
-import { Clock, Star, MapPin, CheckCircle2, Navigation, Check } from "lucide-react";
+import { Clock, Star, MapPin, CheckCircle2, Navigation, Check, Info } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/hooks/useCart";
 import { CartItemInput } from "@/types/cart";
@@ -39,13 +39,18 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantData }) {
       <div className="flex-1">
         <div className="flex justify-between items-start mb-2">
           <h3 className="font-semibold text-foreground text-lg leading-tight">{restaurant.name}</h3>
-          <div className="flex items-center gap-1 bg-foreground text-background px-2 py-0.5 rounded-lg text-sm font-medium">
-            <Star className="w-3.5 h-3.5 fill-background" />
-            {restaurant.rating}
+          <div className="group relative cursor-help">
+            <div className="flex items-center gap-1 bg-foreground text-background px-2 py-0.5 rounded-lg text-sm font-medium">
+              <Star className="w-3.5 h-3.5 fill-background" />
+              {restaurant.rating}
+            </div>
+            <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block w-max max-w-[200px] bg-foreground text-background text-xs p-2 rounded shadow-md z-50 whitespace-normal">
+              Highly rated by users
+            </div>
           </div>
         </div>
         
-        <div className="flex items-center gap-4 text-secondary text-sm mb-3">
+        <div className="flex items-center gap-4 text-secondary text-sm mb-3 flex-wrap">
           <div className="flex items-center gap-1.5">
             <Clock className="w-4 h-4" />
             <span>{restaurant.deliveryTimeMins} mins</span>
@@ -54,18 +59,23 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantData }) {
             <MapPin className="w-4 h-4" />
             <span>Nearby</span>
           </div>
-        </div>
-        
-        <div className="bg-muted/50 rounded-xl p-3 text-sm">
-          <p className="font-medium text-foreground mb-2 text-xs uppercase tracking-wider">Perfect match because</p>
-          <ul className="space-y-1.5">
-            {restaurant.reasons.map((reason, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-secondary">
-                <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <span className="leading-tight">{reason}</span>
-              </li>
-            ))}
-          </ul>
+          
+          {restaurant.reasons && restaurant.reasons.length > 0 && (
+            <div className="group relative cursor-help flex items-center ml-auto">
+              <Info className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
+              <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block w-max max-w-[220px] bg-foreground text-background text-xs p-2.5 rounded-lg shadow-xl z-50 whitespace-normal text-left">
+                <p className="font-semibold mb-1 opacity-90">Why this matches:</p>
+                <ul className="space-y-1">
+                  {restaurant.reasons.map((reason, idx) => (
+                    <li key={idx} className="flex items-start gap-1.5 leading-tight">
+                      <CheckCircle2 className="w-3 h-3 text-primary mt-0.5 shrink-0" />
+                      <span>{reason}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       
@@ -85,9 +95,6 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantData }) {
               Add Meal
             </>
           )}
-        </button>
-        <button className="p-2.5 bg-muted text-foreground rounded-xl hover:bg-border transition-colors">
-          <Navigation className="w-5 h-5" />
         </button>
       </div>
     </div>

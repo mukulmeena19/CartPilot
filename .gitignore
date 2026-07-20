@@ -49,3 +49,6 @@ MANIFEST
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Raw Data
+backend/data/raw/

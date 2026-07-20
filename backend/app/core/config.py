@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     FEATURE_AI: bool = True
     FEATURE_EXPLAINABILITY: bool = True
 
+    LLM_PROVIDER: str = "mock"
     DATABASE_URL: str | None = None
 
     @property
@@ -39,6 +40,6 @@ class Settings(BaseSettings):
             return self.DATABASE_URL
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
 
 settings = Settings()

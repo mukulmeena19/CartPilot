@@ -10,10 +10,12 @@ from .base import LLMProvider
 
 T = TypeVar('T', bound=BaseModel)
 
+from app.core.config import settings
+
 class GeminiProvider(LLMProvider):
     def __init__(self):
-        # Read directly from environment, bypassing pydantic-settings cache
-        api_key = os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
+        # Read from settings which automatically parses the .env file
+        api_key = settings.GEMINI_API_KEY or os.environ.get('GOOGLE_API_KEY')
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable is not set")
         self.client = genai.Client(api_key=api_key)

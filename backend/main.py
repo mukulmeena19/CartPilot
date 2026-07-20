@@ -71,7 +71,7 @@ try:
         conn.commit()
 
     # Import all models so SQLAlchemy knows about them before create_all
-    from app.db.models import user, product, category, cart, order, inventory, token
+    from app.db.models import user, product, category, cart, order, inventory, token, intelligence, knowledge, restaurant, analytics
 
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables verified successfully.")

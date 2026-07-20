@@ -19,6 +19,7 @@ class UserPreferenceContext(BaseModel):
     allergies: Dict[str, PreferenceSignal] = Field(default_factory=dict)
     price_sensitivity: str = Field("medium", description="'low', 'medium', 'high'")
     merchant_preferences: Dict[str, PreferenceSignal] = Field(default_factory=dict)
+    protein_target: Optional[float] = Field(default=None, description="Target protein in grams")
     
     # Track historical outliers or hard rejections
     rejected_products: List[int] = Field(default_factory=list, description="List of product IDs explicitly rejected")

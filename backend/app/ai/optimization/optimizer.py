@@ -58,7 +58,7 @@ class ShoppingOptimizer:
                     # We would typically log this trace to observability tools here
                     continue
                     
-                trace = ScoringEngine.score_candidate(cand, preferences)
+                trace = ScoringEngine.score_candidate(cand, allocation, preferences)
                 
                 valid_candidates.append(
                     OptimizedCandidate(

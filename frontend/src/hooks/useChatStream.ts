@@ -68,25 +68,42 @@ export function useChatStream() {
             const eventType = ev.event;
             
             switch(eventType) {
-              case "thinking":
+              case "understanding":
+              case "planning":
+              case "searching":
+              case "verifying":
+              case "applying":
+              case "optimizing":
+              case "finalizing":
                 addOrUpdateThinkingStep(ev.id || crypto.randomUUID(), data.step, "active");
+                
+                // Mark previous steps as completed
+                const currentSteps = useStore.getState().messages.slice(-1)[0]?.thinkingSteps || [];
+                currentSteps.forEach(s => {
+                  if (s.status === "active" && s.label !== data.step) {
+                    addOrUpdateThinkingStep(s.id, s.label, "completed");
+                  }
+                });
+                break;
+                
+              case "complete":
+                if (data.cart && data.cart.items) {
+                   setAssistantCards(data.cart.items);
+                }
+                if (data.cart && data.cart.explanation && data.cart.explanation.summary) {
+                   appendAssistantChunk("\n\n" + data.cart.explanation.summary);
+                }
+                
+                // Clean up any remaining active steps
+                const finalSteps = useStore.getState().messages.slice(-1)[0]?.thinkingSteps || [];
+                finalSteps.forEach(s => {
+                  if (s.status === "active") addOrUpdateThinkingStep(s.id, s.label, "completed");
+                });
                 break;
                 
               case "intent":
               case "workflow":
                 addOrUpdateThinkingStep(ev.id || crypto.randomUUID(), `Resolved ${eventType}: ${data.workflow_type || data.intent}`, "completed");
-                break;
-                
-              case "retrieval":
-                addOrUpdateThinkingStep(ev.id || crypto.randomUUID(), `Found ${data.candidate_count} products`, "completed");
-                break;
-                
-              case "ranking":
-                addOrUpdateThinkingStep(ev.id || crypto.randomUUID(), `Ranked top ${data.top_k} products`, "completed");
-                break;
-                
-              case "recommendations":
-                setAssistantCards(data.items);
                 break;
                 
               case "assistant_chunk":
@@ -98,11 +115,7 @@ export function useChatStream() {
                 break;
                 
               case "done":
-                // Clean up any remaining active steps
-                const steps = useStore.getState().messages.slice(-1)[0]?.thinkingSteps || [];
-                steps.forEach(s => {
-                  if (s.status === "active") addOrUpdateThinkingStep(s.id, s.label, "completed");
-                });
+                // Handled in complete now, but keep for fallback
                 break;
             }
           } catch (e) {

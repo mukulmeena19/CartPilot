@@ -11,7 +11,7 @@ class PreferenceStore:
         """
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
-            raise ValueError("User not found")
+            return UserPreferenceContext()
             
         raw_prefs = user.preferences or {}
         return UserPreferenceContext(**raw_prefs)

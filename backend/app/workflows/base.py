@@ -18,7 +18,8 @@ class BaseWorkflow(ABC):
     """
     Abstract State Machine.
     """
-    def __init__(self):
+    def __init__(self, db=None):
+        self.db = db
         self.states: Dict[str, Callable[[WorkflowContext], Awaitable[None]]] = {}
         self.register_states()
 
@@ -43,6 +44,9 @@ class BaseWorkflow(ABC):
                 await handler(context)
                 
             if context.current_state == "completed":
+                handler = self.states.get("completed")
+                if handler:
+                    await handler(context)
                 await self.emit_completed(context)
             else:
                 await self.emit_failed(context, "Failed during execution")

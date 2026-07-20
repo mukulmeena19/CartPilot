@@ -47,6 +47,10 @@ def seed_catalog(size: int):
     from app.db.session import engine
     
     print("Creating all tables in the database...")
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        conn.commit()
     Base.metadata.create_all(bind=engine)
     print("Tables created successfully.")
     
